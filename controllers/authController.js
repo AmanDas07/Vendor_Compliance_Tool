@@ -5,7 +5,7 @@ import JWT from 'jsonwebtoken';
 import { checkAuth, requireSignIn } from "../middlewares/authMiddleware.js";
 const authController = Router();
 
-authController.post('/login', async (req, res) => {
+authController.post('/login', requireSignIn, async (req, res) => {
     const { email, password } = req.body;
 
     if (!email) {
@@ -28,7 +28,7 @@ authController.post('/login', async (req, res) => {
         const token = JWT.sign({ _id: user._id }, process.env.JWT_SECRET, {
             expiresIn: "7d",
         });
-        res.cookie('token', token, { httpOnly: true, maxAge: 2 * 60 * 60 * 1000 });
+        res.cookie('token', token, { httpOnly: true, maxAge: 1 * 60 * 60 * 1000 });
         res.status(200).send({
             success: true,
             message: "Login Successful",
@@ -39,6 +39,7 @@ authController.post('/login', async (req, res) => {
                 phone: user.phone,
                 address: user.address,
                 role: user.role,
+                company: user.Company
             },
             token,
         });
@@ -67,8 +68,6 @@ authController.post('/change-password', requireSignIn, async (req, res) => {
 
 })
 
-
-
 authController.post("/logout", checkAuth, async (req, res) => {
     res.clearCookie('token');
     req.session.destroy((err) => {
@@ -80,3 +79,8 @@ authController.post("/logout", checkAuth, async (req, res) => {
 })
 
 export default authController;
+
+/*
+
+
+*/

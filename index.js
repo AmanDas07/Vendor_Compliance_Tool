@@ -37,10 +37,10 @@ const connection = async () => {
 connection();
 
 // Session management
-/*const MongoStore = connectMongo.create({
+const MongoStore = connectMongo.create({
     mongoUrl: process.env.MONGODB_URI,
     collectionName: 'sessions',
-    ttl: 2 * 60 * 60,
+    ttl: 1 * 60 * 60,
     autoRemove: 'native'
 });
 
@@ -49,12 +49,19 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     store: MongoStore,
-    cookie: { secure: process.env.NODE_ENV === 'production', httpOnly: true, maxAge: 2 * 60 * 60 * 1000 } // 2 hours
+    cookie: { secure: process.env.NODE_ENV === 'production', httpOnly: true, maxAge: 1 * 60 * 60 * 1000 }
 }));
 
+app.use((req, res, next) => {
+    if (!req.session || !req.session.user) {
+        res.clearCookie('token');  // Clear the JWT token cookie
+        return res.status(401).send('Session expired, please log in again');
+    }
+    next();
+});
 // CSRF protection
 const csrfProtection = csurf({ cookie: true });
-app.use(csrfProtection);*/
+app.use(csrfProtection);
 
 // Routes
 app.use('/api/v1/auth', authController);
@@ -64,13 +71,16 @@ app.get('/', (req, res) => {
     res.send('API is running...');
 });
 
-/*app.use((err, req, res, next) => {
-    if (err.code !== 'EBADCSRFTOKEN') return next(err);
-    res.status(403);
-    res.send('Form tampered with');
+app.use((err, req, res, next) => {
+    if (err.code === 'EBADCSRFTOKEN') {
+        res.status(403).send('Form tampered with');
+    } else {
+        console.error(err.stack);
+        res.status(500).send('Something went wrong!');
+    }
 });
 
-app.use(sessionManager);*/
+app.use(sessionManager);
 
 app.listen(process.env.PORT, () => {
     console.log(`Server started on port: ${process.env.PORT}`.bgCyan.white);

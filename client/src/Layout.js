@@ -27,7 +27,7 @@ const Layout = (props) => {
                     sx={{
                         mt: theme => theme.spacing(8),
                         width: { sm: `100vw` },
-                        height: { sm: `60vw` },
+                        height: { sm: `55vw` },
 
                     }}
                 >

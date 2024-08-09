@@ -44,8 +44,8 @@ const userSchema = new mongoose.Schema({
 
     messagesRecieved: [{
         from: {
-            type: String,
-            ref: 'Users',
+            type: mongoose.Schema.ObjectId,
+            ref: 'users',
         },
         subject: {
             type: String,

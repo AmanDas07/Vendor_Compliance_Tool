@@ -24,7 +24,7 @@ import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
 import DescriptionIcon from '@mui/icons-material/Description';
 import EngineeringIcon from '@mui/icons-material/Engineering';
 import PolicyIcon from '@mui/icons-material/Policy';
-import Layout from '../Layout';
+import Layout from '../Layout.js';
 
 const theme = createTheme({
     palette: {

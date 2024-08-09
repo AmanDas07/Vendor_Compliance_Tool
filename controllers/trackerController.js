@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 const trackerController = Router();
 const upload = multer({ dest: 'uploads/' });
 //requireSignIn,
-trackerController.post('/create-tracker', upload.array('files', 10), async (req, res) => {
+trackerController.post('/create-tracker', requireSignIn, upload.array('files', 10), async (req, res) => {
     const {
         companyName,
         location,
@@ -69,7 +69,7 @@ trackerController.post('/create-tracker', upload.array('files', 10), async (req,
             dueDate: new Date(dueDate),
             completionDate: completionDate ? new Date(completionDate) : null,
             status,
-            proof: proof === 'true',
+            proof,
             Assignedto,
             trackerOwner,
             trackerManager,
@@ -88,7 +88,7 @@ trackerController.post('/create-tracker', upload.array('files', 10), async (req,
         res.status(500).json({ success: false, message: 'Server error', error });
     }
 });
-trackerController.post("/get-trackers", async (req, res) => {
+trackerController.post("/get-trackers", requireSignIn, async (req, res) => {
     const companyName = req.body.company;
     const location = req.body.state;
     const lawArea = req.body.lawArea;
@@ -163,9 +163,30 @@ trackerController.get("/get_tracker/:uin", async (req, res) => {
 
 })
 
-trackerController.post("/update_tracker/:uin", async (req, res) => {
+trackerController.get("/get_upcoming/:date", requireSignIn, async (req, res) => {
+    const date = req.params.date;
+    const [year, month] = date.split('-').map(Number); // Extract year and month from the date parameter
+
+    // Construct the start and end dates for the month
+    const startDate = new Date(year, month - 1, 1); // First day of the month
+    const endDate = new Date(year, month, 0); // Last day of the month
     try {
-        // Build the dynamic update object
+        const tracker = await Tracker.find({
+            dueDate: { $gte: startDate, $lte: endDate }, status: { $in: ["Open", "pending"] }
+        });
+        res.status(200).send(tracker);
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({ message: 'Error retrieving tracker data', error });
+    }
+});
+
+
+
+
+trackerController.post("/update_tracker/:uin", requireSignIn, async (req, res) => {
+    try {
+
         const updateData = req.body;
         const updateObject = {};
         for (const [key, value] of Object.entries(updateData)) {
@@ -174,7 +195,7 @@ trackerController.post("/update_tracker/:uin", async (req, res) => {
             }
         }
 
-        // Perform the update using findOneAndUpdate
+
         const updatedTracker = await Tracker.findOneAndUpdate(
             { uniqueIdentifier: req.params.uin },
             { $set: updateObject },

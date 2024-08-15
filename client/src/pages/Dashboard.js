@@ -70,8 +70,9 @@ const ComplianceList = () => {
             const year = currentDate.getFullYear();
             const month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
             const date = `${year}-${month}`;
+            console.log(date);
             try {
-                const response = await axios.get(`http://localhost:8082/api/v1/tracker/get_upcoming/${date}`);
+                const response = await axios.get(`http://localhost:8082/api/v1/tracker/get_upcoming/${date}`, { withCredentials: true });
                 setCompliances(Array.isArray(response.data) ? response.data : []);
             } catch (error) {
                 console.error("Error fetching compliance data:", error);

@@ -1,114 +1,146 @@
-'use client'
-
-
-
-import React, { useEffect, useState, useContext } from 'react'
-import "bootstrap/dist/css/bootstrap.min.css";
-import axios, { Axios } from 'axios';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { useRouter } from 'next/navigation.js';
-import Link from 'next/link.js';
-import { UserProvider, userContext } from '../../../context/page.js';
 import Layout from '../Layout.js';
-
-
+import { useNavigate } from 'react-router-dom';
+import { Container, Grid, Typography, TextField, Button, Link, CircularProgress, Box, Paper } from '@mui/material';
+//import BackgroundImage from '../assets/background.jpg'; 
 const Login = () => {
-    useEffect(() => {
-        require("bootstrap/dist/js/bootstrap.bundle.min.js");
-    }, []);
-
-
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
-    const Router = useRouter();
-    const [state, setState] = useContext(userContext);
+    const [csrfToken, setCsrfToken] = useState("");
+    const Router = useNavigate();
 
 
+
+    useEffect(() => {
+        const fetchCsrfToken = async () => {
+            try {
+                const { data } = await axios.get('http://localhost:8082/api/v1/csrf-token');
+                axios.defaults.headers.common['X-CSRF-Token'] = data.csrfToken;
+                setCsrfToken(data.csrfToken);
+                console.log('CSRF Token:', data.csrfToken);
+            } catch (error) {
+                console.error('Error fetching CSRF token:', error);
+            }
+        };
+        fetchCsrfToken();
+    }, []);
 
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-
-
         try {
             setLoading(true);
-            const { data } = await axios.post(`${process.env.NEXT_PUBLIC_API}/login`, {
+            const { data } = await axios.post(`http://localhost:8082/api/v1/auth/login`, {
                 email,
                 password,
-
+                _csrf: csrfToken
             });
-            setState({
-                user: data.user,
-                token: data.token
-            })
-
             toast.success("User Logged in Successfully");
             setLoading(false);
-            Router.push("/Dashboard");
-        }
-        catch (error) {
-            toast.error(error.response.data);
+            Router("/Dashboard");
+        } catch (error) {
             setLoading(false);
+            console.log("Error occurred:", error);
+            if (error.response && error.response.data) {
+                toast.error(error.response.data);
+            } else {
+                toast.error("An unexpected error occurred. Please try again.");
+            }
         }
+    };
 
-
-    }
 
     return (
         <Layout>
-            <div className='container col-md-4 '>
-                <div className='row d-flex justify-content-center align-items-center '>
-                    <div className='col-md-8' />
-                    <h1 className='d-flex align-items-center justify-content-center mt-3 mb-3'>Login</h1>
-                    <form className='shadow-lg p-3 mb-5 bg-white rounded' >
-                        <ToastContainer position="top-center"
-                            autoClose={5000}
-                            hideProgressBar={false}
-                            newestOnTop={false}
-                            closeOnClick
-                            rtl={false}
-                            pauseOnFocusLoss
-                            draggable
-                            pauseOnHover
-                            theme="light"
-                        />
-                        <div className="mb-3 col-md-15">
-                            <label htmlFor="exampleInputEmail" className="form-label">Email address</label>
-                            <input type="email" className="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" value={email} onChange={(event) => { setEmail(event.target.value) }
-                            } />
-                        </div>
-                        <div className="mb-3 col-md-15">
-                            <label htmlFor="exampleInputPassword" className="form-label">Password</label>
-                            <input type="password" className="form-control" id="exampleInputPassword1" value={password} onChange={(event) => { setPassword(event.target.value) }
-                            } />
-                        </div>
-                        <div className='d-flex '>
-                            <button type="submit" className="btn btn-primary bg-dark " onClick={handleSubmit} disabled={!password || !email}>{
-                                loading ? (<>
-                                    <span>Loading &nbsp;</span>
-                                    <span className='spinner-border spinner-border-sm' role='status' area-hidden='true'></span>
-                                </>) : ('Login')
-                            }</button>
-                            <p className='m-3'>New User ?  <Link href="/Register">Click here...</Link></p>
+            <Box
+                sx={{
+                    minHeight: '100vh',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    //backgroundImage: `url(${BackgroundImage})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    p: 3,
+                }}
+            >
+                <ToastContainer
+                    position="top-center"
+                    autoClose={5000}
+                    hideProgressBar={false}
+                    newestOnTop={false}
+                    closeOnClick
+                    rtl={false}
+                    pauseOnFocusLoss
+                    draggable
+                    pauseOnHover
+                    theme="light"
+                />
+                <Container maxWidth="sm">
+                    <Paper elevation={6} sx={{ p: 4, borderRadius: 3, backdropFilter: 'blur(10px)', bgcolor: 'rgba(255, 255, 255, 0.8)' }}>
+                        <Grid container justifyContent="center" alignItems="center" direction="column">
+                            <Typography sx={{ fontFamily: "sans-serif", color: 'darkblue', mb: 2 }} variant="h4" component="h1" gutterBottom >
+                                Login
+                            </Typography>
+                            <Box component="form" onSubmit={handleSubmit} sx={{ width: "100%" }}>
 
-                        </div>
-                        <div className='m-0'>
-                            <p className='m-3 ms-0 w-5 h-5 '> <Link href="/forgot-password" className='font-size-sm text-danger '>Forgot Password ?...</Link></p>
-                        </div>
-
-                    </form>
-                </div>
-            </div>
+                                <Grid item xs={12} sx={{ mb: 3 }}>
+                                    <TextField
+                                        fullWidth
+                                        label="Email address"
+                                        variant="outlined"
+                                        value={email}
+                                        onChange={(event) => setEmail(event.target.value)}
+                                        required
+                                        sx={{ bgcolor: 'rgba(255, 255, 255, 0.9)', borderRadius: 1 }}
+                                    />
+                                </Grid>
+                                <Grid item xs={12} sx={{ mb: 3 }}>
+                                    <TextField
+                                        fullWidth
+                                        label="Password"
+                                        variant="outlined"
+                                        type="password"
+                                        value={password}
+                                        onChange={(event) => setPassword(event.target.value)}
+                                        required
+                                        sx={{ bgcolor: 'rgba(255, 255, 255, 0.9)', borderRadius: 1 }}
+                                    />
+                                </Grid>
+                                <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                                    <Button
+                                        type="submit"
+                                        variant="contained"
+                                        color="primary"
+                                        disabled={!password || !email}
+                                        sx={{ bgcolor: 'darkblue', px: 4, py: 1.5, borderRadius: 3, boxShadow: 4 }}
+                                    >
+                                        {loading ? (
+                                            <>
+                                                <CircularProgress size={20} sx={{ color: 'white', mr: 1 }} />
+                                                Loading
+                                            </>
+                                        ) : (
+                                            'Login'
+                                        )}
+                                    </Button>
+                                    <Link href="/forgot-password" variant="body2" color="error">
+                                        Forgot Password?...
+                                    </Link>
+                                </Grid>
+                            </Box>
+                        </Grid>
+                    </Paper>
+                </Container>
+            </Box>
         </Layout>
-
-
     )
-
-
 }
 
 export default Login;

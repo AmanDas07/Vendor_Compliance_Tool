@@ -10,7 +10,8 @@ import csurf from 'csurf';
 import colors from 'colors';
 import authController from './controllers/authController.js';
 import trackerController from './controllers/trackerController.js';
-import sessionManager from './utils/sessionManager.js';
+import csrf from './controllers/csrfToken.js';
+
 
 dotenv.config();
 
@@ -43,7 +44,11 @@ const MongoStore = connectMongo.create({
     ttl: 1 * 60 * 60,
     autoRemove: 'native'
 });
-
+app.use(cors({
+    origin: 'http://localhost:3000',
+    credentials: true,
+    sameSite: 'none'
+}));
 app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
@@ -52,36 +57,29 @@ app.use(session({
     cookie: { secure: process.env.NODE_ENV === 'production', httpOnly: true, maxAge: 1 * 60 * 60 * 1000 }
 }));
 
-app.use((req, res, next) => {
-    if (!req.session || !req.session.user) {
-        res.clearCookie('token');  // Clear the JWT token cookie
-        return res.status(401).send('Session expired, please log in again');
-    }
-    next();
-});
+
 // CSRF protection
 const csrfProtection = csurf({ cookie: true });
 app.use(csrfProtection);
+app.use((req, res, next) => {
+    res.cookie('XSRF-TOKEN', req.csrfToken(), { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'None' });
+    next();
+});
+
 
 // Routes
 app.use('/api/v1/auth', authController);
 app.use('/api/v1/tracker', trackerController);
+app.use('/api/v1', csrf);
 
 app.get('/', (req, res) => {
     res.send('API is running...');
 });
 
-app.use((err, req, res, next) => {
-    if (err.code === 'EBADCSRFTOKEN') {
-        res.status(403).send('Form tampered with');
-    } else {
-        console.error(err.stack);
-        res.status(500).send('Something went wrong!');
-    }
-});
 
-app.use(sessionManager);
 
-app.listen(process.env.PORT, () => {
+
+
+app.listen(process.env.PORT, '127.0.0.1', () => {
     console.log(`Server started on port: ${process.env.PORT}`.bgCyan.white);
 });

@@ -3,7 +3,7 @@ import multer from 'multer';
 import { join } from 'path';
 import { uploadFile } from './s3service.js';
 import Tracker from '../models/trackerSchema.js';
-import { requireSignIn } from '../middlewares/authMiddleware.js';
+import { csrf, requireSignIn, sessionCheck } from '../middlewares/authMiddleware.js';
 import { v4 as uuidv4 } from 'uuid';
 
 const trackerController = Router();
@@ -88,7 +88,7 @@ trackerController.post('/create-tracker', requireSignIn, upload.array('files', 1
         res.status(500).json({ success: false, message: 'Server error', error });
     }
 });
-trackerController.post("/get-trackers", requireSignIn, async (req, res) => {
+trackerController.post("/get-trackers", requireSignIn, sessionCheck, async (req, res) => {
     const companyName = req.body.company;
     const location = req.body.state;
     const lawArea = req.body.lawArea;
@@ -134,7 +134,7 @@ trackerController.post("/get-trackers", requireSignIn, async (req, res) => {
     }
 })
 
-trackerController.get("/get-tracker/:id", requireSignIn, async (req, res) => {
+trackerController.get("/get-tracker/:id", requireSignIn, sessionCheck, async (req, res) => {
 
     try {
         const tracker_id = req.params;
@@ -149,7 +149,7 @@ trackerController.get("/get-tracker/:id", requireSignIn, async (req, res) => {
     }
 })
 
-trackerController.get("/get_tracker/:uin", async (req, res) => {
+trackerController.get("/get_tracker/:uin", requireSignIn, sessionCheck, async (req, res) => {
     const uin = req.params.uin;
     try {
         const getTracker = async () => {
@@ -162,8 +162,9 @@ trackerController.get("/get_tracker/:uin", async (req, res) => {
     }
 
 })
+//
 
-trackerController.get("/get_upcoming/:date", requireSignIn, async (req, res) => {
+trackerController.get("/get_upcoming/:date", requireSignIn, sessionCheck, async (req, res) => {
     const date = req.params.date;
     const [year, month] = date.split('-').map(Number); // Extract year and month from the date parameter
 
@@ -184,7 +185,7 @@ trackerController.get("/get_upcoming/:date", requireSignIn, async (req, res) => 
 
 
 
-trackerController.post("/update_tracker/:uin", requireSignIn, async (req, res) => {
+trackerController.post("/update_tracker/:uin", requireSignIn, sessionCheck, async (req, res) => {
     try {
 
         const updateData = req.body;

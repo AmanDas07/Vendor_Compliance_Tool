@@ -7,7 +7,8 @@ const authController = Router();
 
 authController.post('/login', async (req, res) => {
     const { email, password } = req.body;
-
+    /* console.log('Session ID:', req.sessionID); // Check if session is available
+     console.log('CSRF Token:', req.csrfToken());*/
     if (!email) {
         return res.status(400).send("Please provide Email");
     }
@@ -38,14 +39,18 @@ authController.post('/login', async (req, res) => {
             role: user.role,
             company: user.Company
         };
-        /*
- */
-        res.cookie('token', token, {
-            httpOnly: true, maxAge: 1 * 60 * 60 * 1000, sameSite: 'None', secure: false
-        });
+        try {
+            res.cookie('token', token, {
+                httpOnly: true, maxAge: 1 * 60 * 60 * 1000, sameSite: 'None', secure: true
+            });
+        } catch (error) {
+            console.error(error);
+        }
+
         const data = res.getHeaders();
-        console.log(data['set-cookie']);
+        //console.log(data['set-cookie']);
         res.status(200).send({
+            role: req.session.user.role,
             success: true,
             message: "Login Successful",
         });
@@ -59,6 +64,7 @@ authController.post('/change-password', requireSignIn, async (req, res) => {
 
     if (!newPassword) {
         return res.status(400).send({
+            role: user.role,
             success: false,
             message: "New Password cannot be Empty"
         })
@@ -85,13 +91,13 @@ authController.post("/logout", requireSignIn, async (req, res) => {
 })
 
 authController.get('/session_data', requireSignIn, (req, res) => {
-    console.log(req.session);
+    //console.log(req.user.role);
     if (!req.session || !req.user) {
         return res.status(401).send("Unauthorized");
     }
     res.status(200).send({
         success: true,
-        user: req.user
+        user: req.user.role
     });
 });
 

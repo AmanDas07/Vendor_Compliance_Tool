@@ -22,50 +22,95 @@ import {
     InputLabel,
     FormControl,
     Chip,
+    Card,
+    CardContent,
+    Divider,
+    Zoom,
+    Avatar,
 } from '@mui/material';
 import { ThemeProvider, createTheme, styled } from '@mui/material/styles';
 import axios from 'axios';
-import { FilterList, Search, Edit } from '@mui/icons-material';
+import { FilterList, Search, Edit, AccountBalance, Assignment, TrendingUp } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 
 const theme = createTheme({
     palette: {
         primary: {
-            main: '#1976d2',
+            main: '#05072E',
         },
         secondary: {
-            main: '#dc004e',
+            main: '#6f74dd',
+        },
+        success: {
+            main: '#66bb6a',
+        },
+        warning: {
+            main: '#ffa726',
+        },
+        error: {
+            main: '#e64a19',
+        },
+        background: {
+            default: '#f5f5f5',
         },
     },
     typography: {
         h6: {
             fontWeight: 600,
         },
+        h7: {
+            fontSize: '1rem',
+            fontWeight: 400,
+        }
     },
 });
 
 const StyledContainer = styled(Container)(({ theme }) => ({
     marginTop: theme.spacing(4),
     padding: theme.spacing(4),
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#ffffff',
     borderRadius: theme.shape.borderRadius,
-    boxShadow: theme.shadows[3],
+    boxShadow: '0px 10px 30px rgba(0, 0, 0, 0.1)',
+    transition: 'transform 0.5s, box-shadow 0.3s',
+    '&:hover': {
+        transform: 'scale(1.02)',
+        boxShadow: '0px 20px 40px rgba(0, 0, 0, 0.2)',
+    },
 }));
 
 const StyledButton = styled(Button)(({ theme }) => ({
     marginTop: theme.spacing(2),
     padding: theme.spacing(1, 4),
     textTransform: 'none',
+    borderRadius: '20px',
+    transition: 'background-color 0.3s, transform 0.3s',
+    '&:hover': {
+        backgroundColor: theme.palette.primary.dark,
+        transform: 'scale(1.05)',
+    },
 }));
 
 const StyledTextField = styled(TextField)(({ theme }) => ({
     margin: theme.spacing(1, 0),
+    borderRadius: '8px',
+    transition: 'border 0.3s, box-shadow 0.3s',
+    '&:hover .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline': {
+        borderColor: theme.palette.primary.main,
+    },
+    '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
+        borderColor: theme.palette.primary.main,
+        boxShadow: '0 0 10px rgba(25, 118, 210, 0.5)',
+    },
 }));
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
     borderBottom: '1px solid #ddd',
     '&:not(:last-child)': {
         borderRight: '1px solid #ddd',
+    },
+    transition: 'background-color 0.3s', // Animation on hover
+    '&:hover': {
+        backgroundColor: theme.palette.action.hover,
     },
 }));
 
@@ -78,6 +123,20 @@ const StyledTableHead = styled(TableHead)(({ theme }) => ({
         '&:not(:last-child)': {
             borderRight: '1px solid #ddd',
         },
+    },
+}));
+
+const StyledCard = styled(Card)(({ theme }) => ({
+    minWidth: 250,
+    margin: theme.spacing(2),
+    padding: theme.spacing(2),
+    backgroundColor: theme.palette.primary.light,
+    color: theme.palette.primary.contrastText,
+    boxShadow: theme.shadows[5],
+    borderRadius: '15px',
+    transition: 'transform 0.3s',
+    '&:hover': {
+        transform: 'scale(1.05)',
     },
 }));
 
@@ -186,12 +245,68 @@ const Trackers = () => {
         <Layout title="All Trackers">
             <ThemeProvider theme={theme}>
                 <StyledContainer>
-                    <Box display="flex" alignItems="center" mb={2}>
-                        <Typography variant="h6">All Trackers</Typography>
-                        <Tooltip title="Filter List">
-                            <FilterList sx={{ ml: 2, color: theme.palette.primary.main }} />
+                    <Box display="flex" alignItems="center" mb={2} sx={{ transition: 'opacity 0.3s', '&:hover': { opacity: 0.8 } }}>
+                        <Typography variant="h6" sx={{ fontWeight: 700 }}>All Trackers</Typography>
+                        <Tooltip title="Filter List" arrow>
+                            <FilterList sx={{ ml: 2, color: theme.palette.primary.main, cursor: 'pointer' }} />
                         </Tooltip>
                     </Box>
+
+                    {/* Cards Section for Highlighted Information */}
+                    <Grid container spacing={2}>
+                        <Zoom in={true} timeout={500}>
+                            <Grid item xs={12} sm={4}>
+                                <StyledCard>
+                                    <CardContent>
+                                        <Box display="flex" alignItems="center">
+                                            <Avatar sx={{ bgcolor: theme.palette.primary.main }}>
+                                                <AccountBalance />
+                                            </Avatar>
+                                            <Box ml={2}>
+                                                <Typography variant="h6" sx={{ fontWeight: 700 }}>Total Trackers</Typography>
+                                                <Typography variant="body2">42 Trackers</Typography>
+                                            </Box>
+                                        </Box>
+                                    </CardContent>
+                                </StyledCard>
+                            </Grid>
+                        </Zoom>
+                        <Zoom in={true} timeout={700}>
+                            <Grid item xs={12} sm={4}>
+                                <StyledCard>
+                                    <CardContent>
+                                        <Box display="flex" alignItems="center">
+                                            <Avatar sx={{ bgcolor: theme.palette.secondary.main }}>
+                                                <Assignment />
+                                            </Avatar>
+                                            <Box ml={2}>
+                                                <Typography variant="h6" sx={{ fontWeight: 700 }}>Pending Reviews</Typography>
+                                                <Typography variant="body2">15 Pending</Typography>
+                                            </Box>
+                                        </Box>
+                                    </CardContent>
+                                </StyledCard>
+                            </Grid>
+                        </Zoom>
+                        <Zoom in={true} timeout={900}>
+                            <Grid item xs={12} sm={4}>
+                                <StyledCard>
+                                    <CardContent>
+                                        <Box display="flex" alignItems="center">
+                                            <Avatar sx={{ bgcolor: theme.palette.success.main }}>
+                                                <TrendingUp />
+                                            </Avatar>
+                                            <Box ml={2}>
+                                                <Typography variant="h6" sx={{ fontWeight: 700 }}>Completed Trackers</Typography>
+                                                <Typography variant="body2">27 Completed</Typography>
+                                            </Box>
+                                        </Box>
+                                    </CardContent>
+                                </StyledCard>
+                            </Grid>
+                        </Zoom>
+                    </Grid>
+
                     <form onSubmit={handleSubmit}>
                         <Grid container spacing={3}>
                             <Grid item xs={12} md={6} lg={4}>
@@ -222,7 +337,7 @@ const Trackers = () => {
                                         renderValue={(selected) => (
                                             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                                                 {selected.map((value) => (
-                                                    <Chip key={value} label={value} />
+                                                    <Chip key={value} label={value} sx={{ animation: 'fadeIn 0.5s' }} />
                                                 ))}
                                             </Box>
                                         )}
@@ -248,7 +363,7 @@ const Trackers = () => {
                                         renderValue={(selected) => (
                                             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                                                 {selected.map((value) => (
-                                                    <Chip key={value} label={value} />
+                                                    <Chip key={value} label={value} sx={{ animation: 'fadeIn 0.5s' }} />
                                                 ))}
                                             </Box>
                                         )}
@@ -273,7 +388,7 @@ const Trackers = () => {
                                         renderValue={(selected) => (
                                             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                                                 {selected.map((value) => (
-                                                    <Chip key={value} label={value} />
+                                                    <Chip key={value} label={value} sx={{ animation: 'fadeIn 0.5s' }} />
                                                 ))}
                                             </Box>
                                         )}
@@ -298,7 +413,7 @@ const Trackers = () => {
                                         renderValue={(selected) => (
                                             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                                                 {selected.map((value) => (
-                                                    <Chip key={value} label={value} />
+                                                    <Chip key={value} label={value} sx={{ animation: 'fadeIn 0.5s' }} />
                                                 ))}
                                             </Box>
                                         )}
@@ -349,7 +464,7 @@ const Trackers = () => {
                             </Grid>
                         </Grid>
                     </form>
-                    <Box display="flex" alignItems="center" mt={4} mb={2}>
+                    <Box display="flex" alignItems="center" mt={4} mb={2} sx={{ animation: 'fadeIn 1s' }}>
                         <FormControl sx={{ mr: 2, minWidth: 120 }}>
                             <InputLabel>Search Field</InputLabel>
                             <Select
@@ -375,67 +490,76 @@ const Trackers = () => {
                             color="primary"
                             onClick={handleSearch}
                             startIcon={<Search />}
-                            sx={{ ml: 2 }}
+                            sx={{
+                                ml: 2,
+                                transition: 'transform 0.3s',
+                                borderRadius: '20px',
+                                '&:hover': {
+                                    transform: 'scale(1.05)',
+                                },
+                            }}
                         >
                             Search
                         </Button>
                     </Box>
-                    <TableContainer component={Paper} sx={{ marginTop: 4, marginBottom: 1 }}>
-                        <Table>
-                            <StyledTableHead>
-                                <TableRow>
-                                    <StyledTableCell>UIN</StyledTableCell>
-                                    <StyledTableCell>Location</StyledTableCell>
-                                    <StyledTableCell>Compliance Activity</StyledTableCell>
-                                    <StyledTableCell>Law Area</StyledTableCell>
-                                    <StyledTableCell>Act or Rule</StyledTableCell>
-                                    <StyledTableCell>Due Date</StyledTableCell>
-                                    <StyledTableCell>Risk</StyledTableCell>
-                                    <StyledTableCell>Form</StyledTableCell>
-                                    <StyledTableCell>Consequence</StyledTableCell>
-                                    <StyledTableCell>Proof</StyledTableCell>
-                                    <StyledTableCell>Status</StyledTableCell>
-                                    <StyledTableCell>Details</StyledTableCell>
-                                </TableRow>
-                            </StyledTableHead>
-                            <TableBody>
-                                {filteredData != null && filteredData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
-                                    <TableRow key={row.uniqueIdentifier}>
-                                        <StyledTableCell>{row.uniqueIdentifier}</StyledTableCell>
-                                        <StyledTableCell>{row.location}</StyledTableCell>
-                                        <StyledTableCell>{row.complianceActivity}</StyledTableCell>
-                                        <StyledTableCell>{row.lawArea}</StyledTableCell>
-                                        <StyledTableCell>{row.actOrRule}</StyledTableCell>
-                                        <StyledTableCell>{new Date(row.dueDate).toLocaleDateString()}</StyledTableCell>
-                                        <StyledTableCell>{row.risk}</StyledTableCell>
-                                        <StyledTableCell>{row.form}</StyledTableCell>
-                                        <StyledTableCell>{row.consequence}</StyledTableCell>
-                                        <StyledTableCell>{row.proof ? 'Yes' : 'No'}</StyledTableCell>
-                                        <StyledTableCell>{row.status}</StyledTableCell>
-                                        <StyledTableCell>
-                                            <Tooltip title="Edit Detail">
-                                                <IconButton size="small" color="primary" onClick={() => {
-                                                    const UIN = JSON.stringify(row.uniqueIdentifier).replace(/"/g, '');
-                                                    handleEdit(UIN);
-                                                }}>
-                                                    <Edit />
-                                                </IconButton>
-                                            </Tooltip>
-                                        </StyledTableCell>
+                    <Zoom in={true} timeout={500}>
+                        <TableContainer component={Paper} sx={{ marginTop: 4, marginBottom: 1, boxShadow: theme.shadows[3], transition: 'transform 0.5s, box-shadow 0.3s', '&:hover': { transform: 'scale(1.01)', boxShadow: theme.shadows[6] } }}>
+                            <Table>
+                                <StyledTableHead>
+                                    <TableRow>
+                                        <StyledTableCell>UIN</StyledTableCell>
+                                        <StyledTableCell>Location</StyledTableCell>
+                                        <StyledTableCell>Compliance Activity</StyledTableCell>
+                                        <StyledTableCell>Law Area</StyledTableCell>
+                                        <StyledTableCell>Act or Rule</StyledTableCell>
+                                        <StyledTableCell>Due Date</StyledTableCell>
+                                        <StyledTableCell>Risk</StyledTableCell>
+                                        <StyledTableCell>Form</StyledTableCell>
+                                        <StyledTableCell>Consequence</StyledTableCell>
+                                        <StyledTableCell>Proof</StyledTableCell>
+                                        <StyledTableCell>Status</StyledTableCell>
+                                        <StyledTableCell>Details</StyledTableCell>
                                     </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                        <TablePagination
-                            rowsPerPageOptions={[5, 10, 25]}
-                            component="div"
-                            count={filteredData.length}
-                            rowsPerPage={rowsPerPage}
-                            page={page}
-                            onPageChange={handleChangePage}
-                            onRowsPerPageChange={handleChangeRowsPerPage}
-                        />
-                    </TableContainer>
+                                </StyledTableHead>
+                                <TableBody>
+                                    {filteredData != null && filteredData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
+                                        <TableRow key={row.uniqueIdentifier} sx={{ transition: 'background-color 0.3s', '&:hover': { backgroundColor: theme.palette.action.hover } }}>
+                                            <StyledTableCell>{row.uniqueIdentifier}</StyledTableCell>
+                                            <StyledTableCell>{row.location}</StyledTableCell>
+                                            <StyledTableCell>{row.complianceActivity}</StyledTableCell>
+                                            <StyledTableCell>{row.lawArea}</StyledTableCell>
+                                            <StyledTableCell>{row.actOrRule}</StyledTableCell>
+                                            <StyledTableCell>{new Date(row.dueDate).toLocaleDateString()}</StyledTableCell>
+                                            <StyledTableCell>{row.risk}</StyledTableCell>
+                                            <StyledTableCell>{row.form}</StyledTableCell>
+                                            <StyledTableCell>{row.consequence}</StyledTableCell>
+                                            <StyledTableCell>{row.proof ? 'Yes' : 'No'}</StyledTableCell>
+                                            <StyledTableCell>{row.status}</StyledTableCell>
+                                            <StyledTableCell>
+                                                <Tooltip title="Edit Detail" arrow>
+                                                    <IconButton size="small" color="primary" onClick={() => {
+                                                        const UIN = JSON.stringify(row.uniqueIdentifier).replace(/"/g, '');
+                                                        handleEdit(UIN);
+                                                    }}>
+                                                        <Edit />
+                                                    </IconButton>
+                                                </Tooltip>
+                                            </StyledTableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                            <TablePagination
+                                rowsPerPageOptions={[5, 10, 25]}
+                                component="div"
+                                count={filteredData.length}
+                                rowsPerPage={rowsPerPage}
+                                page={page}
+                                onPageChange={handleChangePage}
+                                onRowsPerPageChange={handleChangeRowsPerPage}
+                            />
+                        </TableContainer>
+                    </Zoom>
                 </StyledContainer>
             </ThemeProvider>
         </Layout>

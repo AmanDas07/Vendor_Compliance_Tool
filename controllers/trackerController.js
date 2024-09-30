@@ -3,9 +3,9 @@ import multer from 'multer';
 import { join } from 'path';
 import { uploadFile } from './s3service.js';
 import Tracker from '../models/trackerSchema.js';
-import { csrf, requireSignIn, sessionCheck } from '../middlewares/authMiddleware.js';
+import { requireSignIn, sessionCheck } from '../middlewares/authMiddleware.js';
 import { v4 as uuidv4 } from 'uuid';
-
+// csrf,
 const trackerController = Router();
 const upload = multer({ dest: 'uploads/' });
 //requireSignIn,

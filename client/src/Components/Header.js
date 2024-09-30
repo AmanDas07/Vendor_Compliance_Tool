@@ -1,7 +1,8 @@
 import * as React from 'react';
 import { styled, alpha } from '@mui/material/styles';
-import { AppBar, Box, Toolbar, IconButton, Typography, InputBase, Badge, MenuItem, Menu } from '@mui/material';
+import { AppBar, Box, Toolbar, IconButton, Typography, InputBase, Badge, MenuItem, Menu, Avatar } from '@mui/material';
 import { Menu as MenuIcon, Search as SearchIcon, AccountCircle, Mail as MailIcon, Notifications as NotificationsIcon, MoreVert as MoreIcon } from '@mui/icons-material';
+import { Link } from 'react-router-dom';
 
 const Search = styled('div')(({ theme }) => ({
     position: 'relative',
@@ -11,11 +12,11 @@ const Search = styled('div')(({ theme }) => ({
         backgroundColor: alpha(theme.palette.common.white, 0.25),
     },
     marginRight: theme.spacing(2),
-    marginLeft: 0,
-    width: '100%',
-    [theme.breakpoints.up('sm')]: {
-        marginLeft: theme.spacing(3),
-        width: 'auto',
+    marginLeft: theme.spacing(3),
+    width: 'auto',
+    [theme.breakpoints.down('sm')]: {
+        marginLeft: theme.spacing(1),
+        width: '100%',
     },
 }));
 
@@ -37,12 +38,12 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
         transition: theme.transitions.create('width'),
         width: '100%',
         [theme.breakpoints.up('md')]: {
-            width: '20ch',
+            width: '24ch',
         },
     },
 }));
 
-export default function PrimarySearchAppBar({ handleDrawerToggle }) {
+const PrimarySearchAppBar = ({ handleDrawerToggle }) => {
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
 
@@ -111,7 +112,7 @@ export default function PrimarySearchAppBar({ handleDrawerToggle }) {
                         <MailIcon />
                     </Badge>
                 </IconButton>
-                <p>Messages</p>
+                <Typography variant="body2" sx={{ ml: 2 }}>Messages</Typography>
             </MenuItem>
             <MenuItem>
                 <IconButton
@@ -123,7 +124,7 @@ export default function PrimarySearchAppBar({ handleDrawerToggle }) {
                         <NotificationsIcon />
                     </Badge>
                 </IconButton>
-                <p>Notifications</p>
+                <Typography variant="body2" sx={{ ml: 2 }}>Notifications</Typography>
             </MenuItem>
             <MenuItem onClick={handleProfileMenuOpen}>
                 <IconButton
@@ -135,14 +136,14 @@ export default function PrimarySearchAppBar({ handleDrawerToggle }) {
                 >
                     <AccountCircle />
                 </IconButton>
-                <p>Profile</p>
+                <Typography variant="body2" sx={{ ml: 2 }}>Profile</Typography>
             </MenuItem>
         </Menu>
     );
 
     return (
         <Box sx={{ flexGrow: 1 }}>
-            <AppBar position="fixed" sx={{ backgroundColor: "#4A90E2", width: { sm: `100vw` }, padding: '0' }}>
+            <AppBar position="fixed" sx={{ backgroundColor: 'linear-gradient(90deg, rgba(5,7,46,1) 0%, rgba(36,37,65,1) 100%)', boxShadow: '0 4px 12px rgba(0,0,0,0.2)' }}>
                 <Toolbar>
                     <IconButton
                         size="large"
@@ -158,63 +159,66 @@ export default function PrimarySearchAppBar({ handleDrawerToggle }) {
                         variant="h6"
                         noWrap
                         component="div"
-                        sx={{ display: { xs: 'none', sm: 'block' }, color: "white", fontFamily: "serif", fontWeight: "bold" }}
+                        sx={{ display: { xs: 'none', sm: 'block' }, fontFamily: "serif", fontWeight: "bold", color: "white" }}
                     >
-                        VENDOR COMPLIANCE
-                    </Typography>
-                    <div style={{ marginLeft: "40%" }}>
-                        <Search >
-                            <SearchIconWrapper>
-                                <SearchIcon />
-                            </SearchIconWrapper>
-                            <StyledInputBase
-                                placeholder="Search…"
-                                inputProps={{ 'aria-label': 'search' }}
+                        <Link to="/" style={{ textDecoration: 'none', color: 'white' }}>
+                            <Avatar
+                                src='https://jumpshare.com/s/0I59FpGR2MvU2bd8117k'
+                                alt="Complisense-logo"
+                                sx={{ width: 36, height: 36, mr: 1, bgcolor: 'transparent' }}
                             />
-                        </Search>
-                    </div>
-                    <div style={{ margin: "0" }}>
-                        <Box sx={{ flexGrow: 1 }} />
-                        <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
-                            <IconButton size="large" aria-label="show 4 new mails" color="inherit">
-                                <Badge badgeContent={4} color="error">
-                                    <MailIcon />
-                                </Badge>
-                            </IconButton>
-                            <IconButton
-                                size="large"
-                                aria-label="show 17 new notifications"
-                                color="inherit"
-                            >
-                                <Badge badgeContent={17} color="error">
-                                    <NotificationsIcon />
-                                </Badge>
-                            </IconButton>
-                            <IconButton
-                                size="large"
-                                edge="end"
-                                aria-label="account of current user"
-                                aria-controls={menuId}
-                                aria-haspopup="true"
-                                onClick={handleProfileMenuOpen}
-                                color="inherit"
-                            >
-                                <AccountCircle />
-                            </IconButton>
-                        </Box>
-                        <Box sx={{ display: { xs: 'flex', md: 'none' } }}>
-                            <IconButton
-                                size="large"
-                                aria-label="show more"
-                                aria-controls={mobileMenuId}
-                                aria-haspopup="true"
-                                onClick={handleMobileMenuOpen}
-                                color="inherit"
-                            >
-                                <MoreIcon />
-                            </IconButton>
-                        </Box>
-                    </div>
+                            Complisense
+                        </Link>
+                    </Typography>
+                    <Search>
+                        <SearchIconWrapper>
+                            <SearchIcon />
+                        </SearchIconWrapper>
+                        <StyledInputBase
+                            placeholder="Search…"
+                            inputProps={{ 'aria-label': 'search' }}
+                        />
+                    </Search>
+                    <Box sx={{ flexGrow: 1 }} />
+                    <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
+                        <IconButton size="large" aria-label="show 4 new mails" color="inherit">
+                            <Badge badgeContent={4} color="error">
+                                <MailIcon />
+                            </Badge>
+                        </IconButton>
+                        <IconButton
+                            size="large"
+                            aria-label="show 17 new notifications"
+                            color="inherit"
+                        >
+                            <Badge badgeContent={17} color="error">
+                                <NotificationsIcon />
+                            </Badge>
+                        </IconButton>
+                        <IconButton
+                            size="large"
+                            edge="end"
+                            aria-label="account of current user"
+                            aria-controls={menuId}
+                            aria-haspopup="true"
+                            onClick={handleProfileMenuOpen}
+                            color="inherit"
+                        >
+                            <AccountCircle />
+                        </IconButton>
+                    </Box>
+                    <Box sx={{ display: { xs: 'flex', md: 'none' } }}>
+                        <IconButton
+                            size="large"
+                            aria-label="show more"
+                            aria-controls={mobileMenuId}
+                            aria-haspopup="true"
+                            onClick={handleMobileMenuOpen}
+                            color="inherit"
+                        >
+                            <MoreIcon />
+                        </IconButton>
+                    </Box>
                 </Toolbar>
             </AppBar>
             {renderMobileMenu}
@@ -222,3 +226,5 @@ export default function PrimarySearchAppBar({ handleDrawerToggle }) {
         </Box>
     );
 }
+
+export default PrimarySearchAppBar;

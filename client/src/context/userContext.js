@@ -1,27 +1,33 @@
 import axios from "axios";
 import { createContext, useContext, useEffect, useState } from "react";
-
+import api from "../../src/api";
 const userContext = createContext();
 
 const UserProvider = ({ children }) => {
     const [state, setState] = useState({
         user: null,
         loading: true,
+        baal: null,
     });
 
-    /*useEffect(() => {
+    useEffect(() => {
         const fetchSessionData = async () => {
             try {
-                const { data } = await axios.get(`http://localhost:8082/api/v1/auth/session_data`);
+                console.log("Fetching session data...");
+                const { data } = await api.get(`http://localhost:3001/api/v1/auth/session_data`, {
+                    withCredentials: true // Ensure credentials are sent with the request
+                });
+                console.log("Session data received:", data);
                 setState({ user: data.user, loading: false });
             } catch (error) {
-                console.log("Error getting session data", error);
-                setState({ user: null, loading: false });
+                console.log("Error getting session data:", error);
+                setState({ user: null, loading: true });
             }
         };
 
         fetchSessionData();
-    }, []);*/
+    }, []);
+
 
     return (
         <userContext.Provider value={[state, setState]}>

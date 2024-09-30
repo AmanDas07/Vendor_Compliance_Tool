@@ -3,19 +3,23 @@ import User from '../models/userModel.js';
 
 export const requireSignIn = async (req, res, next) => {
     try {
+        // Try fetching token from cookies or Authorization header
         const token = req.cookies.token || (req.headers.authorization && req.headers.authorization.split(" ")[1]);
-        console.log(token);
         if (!token) {
             console.log("No token provided");
             return res.status(401).send("Unauthorized");
         }
+
+        // Verify token
         const decode = JWT.verify(token, process.env.JWT_SECRET);
         req.user = await User.findById(decode._id);
+
         if (!req.user) {
             console.log("No user found for this token");
             return res.status(401).send("Unauthorized");
         }
-        next();
+
+        next(); // Proceed to the next middleware or route handler
     } catch (error) {
         console.log("Error verifying token:", error);
         res.status(401).send("Unauthorized");

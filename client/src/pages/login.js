@@ -5,6 +5,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import Layout from '../Layout.js';
 import { useNavigate } from 'react-router-dom';
 import { Container, Grid, Typography, TextField, Button, Link, CircularProgress, Box, Paper } from '@mui/material';
+import api from '../../src/api.js';
 //import BackgroundImage from '../assets/background.jpg'; 
 const Login = () => {
 
@@ -16,19 +17,20 @@ const Login = () => {
 
 
 
-    useEffect(() => {
+    /*useEffect(() => {
         const fetchCsrfToken = async () => {
             try {
                 const { data } = await axios.get('http://localhost:8082/api/v1/csrf-token');
                 axios.defaults.headers.common['X-CSRF-Token'] = data.csrfToken;
                 setCsrfToken(data.csrfToken);
                 console.log('CSRF Token:', data.csrfToken);
+                console.log('Axios Default Headers:', axios.defaults.headers.common); // Log to confirm
             } catch (error) {
                 console.error('Error fetching CSRF token:', error);
             }
         };
         fetchCsrfToken();
-    }, []);
+    }, []);*/
 
 
     const handleSubmit = async (e) => {
@@ -36,19 +38,22 @@ const Login = () => {
 
         try {
             setLoading(true);
-            const { data } = await axios.post(`http://localhost:8082/api/v1/auth/login`, {
+            const data = await api.post(`http://localhost:3001/api/v1/auth/login`, {
                 email,
                 password,
                 _csrf: csrfToken
+            }, {
+                withCredentials: true // Ensures cookies are sent and received
             });
             toast.success("User Logged in Successfully");
             setLoading(false);
-            Router("/Dashboard");
+            Router(`/dashboard/${data.data.role}`);
+            console.log(data.data.role);
         } catch (error) {
             setLoading(false);
-            console.log("Error occurred:", error);
+            // console.log("Error occurred:", error);
             if (error.response && error.response.data) {
-                toast.error(error.response.data);
+                toast.error("Something went wrong");
             } else {
                 toast.error("An unexpected error occurred. Please try again.");
             }

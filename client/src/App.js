@@ -11,37 +11,47 @@ import Login from './pages/login.js';
 import OwnerRoute from './Secondary Pages/Roles/ownerRoute.js';
 import ManagerRoute from './Secondary Pages/Roles/managerRoute.js';
 import ManagerDashboard from './pages/managerDashboard.js';
+import { UserProvider } from './context/userContext.js';
+import Users from './pages/usersPage.js';
 function App() {
   return (
-    <Routes>
-      <Route path="/alltrackers" element={<Trackers />} />
-      <Route path="/workspace" element={<Workspace />} />
-      <Route path="/add_user" element={<UserForm />} />
-      <Route path='/Edit/:uin' element={<EditPage />} />
+    <UserProvider>
+      <Routes>
+        <Route path="/alltrackers" element={<Trackers />} />
+        <Route path="/workspace" element={<Workspace />} />
+        <Route path="/add_user" element={<UserForm />} />
+        <Route path='/Edit/:uin' element={<EditPage />} />
 
+        <Route path="/dashboard/owner" element={<OwnerRoute />}>
+          <Route path="" element={<ComplianceCalendar />} />
+        </Route>
 
+        <Route path="/dashboard/manager" element={<ManagerRoute />}>
+          <Route path="" element={<ManagerDashboard />} />
+        </Route>
 
-      <Route path="/dashboard/owner" element={<OwnerRoute />}>
-        <Route path="" element={<ComplianceCalendar />} />
-      </Route>
-
-      <Route path="/dashboard/manager" element={<ManagerRoute />}>
-        <Route path="" element={<ManagerDashboard />} />
-      </Route>
-
-
-      <Route path='/INTEL_CLRA' element={<CLRAForm />} />
-      <Route path='/Form_14' element={<FormXXIV />} />
-      <Route path='/Half_Yearly' element={<ComplianceCertificateForm />} />
-      <Route path='/Login' element={<Login />} />
-    </Routes>
+        <Route path="/users" element={<Users />} />
+        <Route path="/owner" element={<ComplianceCalendar />} />
+        <Route path="/dashboard/manager" element={<ManagerDashboard />} />
+        <Route path='/INTEL_CLRA' element={<CLRAForm />} />
+        <Route path='/Form_14' element={<FormXXIV />} />
+        <Route path='/Half_Yearly' element={<ComplianceCertificateForm />} />
+        <Route path='/Login' element={<Login />} />
+      </Routes>
+    </UserProvider>
   );
 }
 
 export default App;
 /*
 
+  <Route path="/dashboard/owner" element={<OwnerRoute />}>
+        <Route path="" element={<ComplianceCalendar />} />
+      </Route>
 
+      <Route path="/dashboard/manager" element={<ManagerRoute />}>
+        
+      </Route>
      
 
 */

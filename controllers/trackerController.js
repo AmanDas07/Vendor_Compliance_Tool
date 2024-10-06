@@ -91,7 +91,7 @@ trackerController.post('/create-tracker', requireSignIn, upload.array('files', 1
 trackerController.post("/get-trackers", requireSignIn, sessionCheck, async (req, res) => {
     const companyName = req.body.company;
     const location = req.body.state;
-    const lawArea = req.body.lawArea;
+    //const lawArea = req.body.lawArea;
     const periodicity = req.body.periodicity;
     const startDate = req.body.startDate;
     const endDate = req.body.endDate;
@@ -105,9 +105,9 @@ trackerController.post("/get-trackers", requireSignIn, sessionCheck, async (req,
     if (location) {
         query.location = location;
     }
-    if (lawArea) {
+    /*if (lawArea) {
         query.lawArea = lawArea;
-    }
+    }*/
     if (periodicity) {
         query.periodicity = periodicity;
     }

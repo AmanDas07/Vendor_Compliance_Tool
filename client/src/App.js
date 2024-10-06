@@ -13,6 +13,7 @@ import ManagerRoute from './Secondary Pages/Roles/managerRoute.js';
 import ManagerDashboard from './pages/managerDashboard.js';
 import { UserProvider } from './context/userContext.js';
 import Users from './pages/usersPage.js';
+import EditUser from './pages/editUser.js';
 function App() {
   return (
     <UserProvider>
@@ -21,6 +22,7 @@ function App() {
         <Route path="/workspace" element={<Workspace />} />
         <Route path="/add_user" element={<UserForm />} />
         <Route path='/Edit/:uin' element={<EditPage />} />
+        <Route path="/edit-user/:id" element={<EditUser />} />
 
         <Route path="/dashboard/owner" element={<OwnerRoute />}>
           <Route path="" element={<ComplianceCalendar />} />
@@ -30,9 +32,8 @@ function App() {
           <Route path="" element={<ManagerDashboard />} />
         </Route>
 
-        <Route path="/users" element={<Users />} />
+        <Route path="/manage/users" element={<Users />} />
         <Route path="/owner" element={<ComplianceCalendar />} />
-        <Route path="/dashboard/manager" element={<ManagerDashboard />} />
         <Route path='/INTEL_CLRA' element={<CLRAForm />} />
         <Route path='/Form_14' element={<FormXXIV />} />
         <Route path='/Half_Yearly' element={<ComplianceCertificateForm />} />

@@ -45,6 +45,7 @@ const Login = () => {
             }, {
                 withCredentials: true // Ensures cookies are sent and received
             });
+            localStorage.setItem('userRole', data.data.role);
             toast.success("User Logged in Successfully");
             setLoading(false);
             Router(`/dashboard/${data.data.role}`);

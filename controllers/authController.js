@@ -3,6 +3,9 @@ import userModel from "../models/userModel.js";
 import { comparePassword, hashed } from "../helpers/helper.js"
 import JWT from 'jsonwebtoken';
 import { requireSignIn } from "../middlewares/authMiddleware.js";
+import MongoStore from "connect-mongo";
+import mongoose from "mongoose";
+//import { sessionStore } from '../index.js';
 const authController = Router();
 
 authController.post('/login', async (req, res) => {
@@ -80,15 +83,29 @@ authController.post('/change-password', requireSignIn, async (req, res) => {
 
 })
 
-authController.post("/logout", requireSignIn, async (req, res) => {
-    res.clearCookie('token');
+
+
+authController.post('/logout', requireSignIn, (req, res) => {
+    const sessionId = req.sessionID;  // Get the current session ID
+
+    console.log('Session ID to destroy:', sessionId);
+
+    // Destroy the session
     req.session.destroy((err) => {
         if (err) {
-            return res.status(500).json({ message: 'Server error' });
+            console.error('Error destroying session:', err);
+            return res.status(500).json({ message: 'Failed to logout' });
         }
-        res.status(200).json({ message: 'Logout successful' });
+
+        // Clear the session cookie
+        res.clearCookie('token', { path: '/' });
+        res.clearCookie('js_session');
+        console.log(`Session ${sessionId} successfully destroyed and removed from the database`);
+        return res.status(200).json({ message: 'Logout successful' });
     });
-})
+});
+
+
 
 authController.get('/session_data', requireSignIn, (req, res) => {
     //console.log(req.user.role);

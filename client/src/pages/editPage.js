@@ -40,6 +40,7 @@ import AddIcon from '@mui/icons-material/Add';
 import UploadIcon from '@mui/icons-material/Upload';
 import Layout from '../Layout';
 import { styled } from '@mui/material/styles';
+import api from '../api';
 
 const StyledTableHead = styled(TableHead)(({ theme }) => ({
     backgroundColor: theme.palette.primary.main,
@@ -77,7 +78,9 @@ const EditPage = () => {
 
     useEffect(() => {
         const fetchData = async () => {
-            const { data } = await axios.get(`http://localhost:8082/api/v1/tracker/get_tracker/${uin}`);
+            const { data } = await axios.get(`http://localhost:3001/api/v1/tracker/get_tracker/${uin}`, {
+                withCredentials: true
+            });
             setData(data);
             setFormState({
                 complianceActivity: data[0].complianceActivity,
@@ -92,8 +95,8 @@ const EditPage = () => {
                 form: data[0].form,
                 consequence: data[0].consequence,
                 risk: data[0].risk,
-                dueDate: data[0].dueDate.split('T')[0],  
-                completionDate: data[0].completionDate.split('T')[0],  
+                dueDate: data[0].dueDate.split('T')[0],
+                completionDate: data[0].completionDate.split('T')[0],
                 status: data[0].status,
                 proofNotRequired: data[0].proofNotRequired,
             });
@@ -152,9 +155,10 @@ const EditPage = () => {
         formData.append('file', file);
 
         try {
-            const response = await axios.post(`http://localhost:8080/api/v1/tracker/upload_proof/${uin}`, formData, {
+            const response = await api.post(`http://localhost:3001/api/v1/tracker/upload_proof/${uin}`, formData, {
                 headers: {
-                    'Content-Type': 'multipart/form-data'
+                    'Content-Type': 'multipart/form-data',
+                    withCredentials: true
                 }
             });
             console.log('File upload response:', response.data);

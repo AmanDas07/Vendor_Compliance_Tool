@@ -2,8 +2,9 @@ import * as React from 'react';
 import { styled, alpha } from '@mui/material/styles';
 import { AppBar, Box, Toolbar, IconButton, Typography, InputBase, Badge, MenuItem, Menu, Avatar } from '@mui/material';
 import { Menu as MenuIcon, Search as SearchIcon, AccountCircle, Mail as MailIcon, Notifications as NotificationsIcon, MoreVert as MoreIcon } from '@mui/icons-material';
-import { Link } from 'react-router-dom';
-
+import { Link, useNavigate } from 'react-router-dom';
+import { ToastContainer, toast } from 'react-toastify';
+import api from '../../src/api.js';
 const Search = styled('div')(({ theme }) => ({
     position: 'relative',
     borderRadius: theme.shape.borderRadius,
@@ -46,7 +47,7 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 const PrimarySearchAppBar = ({ handleDrawerToggle }) => {
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
-
+    const Route =  useNavigate();
     const isMenuOpen = Boolean(anchorEl);
     const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
 
@@ -62,6 +63,26 @@ const PrimarySearchAppBar = ({ handleDrawerToggle }) => {
         setAnchorEl(null);
         handleMobileMenuClose();
     };
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            // Adding 'await' to wait for the axios request to complete
+            const { data } = await api.post("http://localhost:3001/api/v1/auth/logout", {}, {
+                withCredentials: true,
+            });
+    
+            // If data exists (successful response)
+            if (data) {
+                localStorage.removeItem('userRole');
+                toast.success("Logged Out Successfully");
+                Route("/login"); // Navigate to login page
+            }
+        } catch (error) {
+            console.error("Error: " + error); // Logging error for debugging
+            toast.error("Something went wrong");
+        }
+    };
+    
 
     const handleMobileMenuOpen = (event) => {
         setMobileMoreAnchorEl(event.currentTarget);
@@ -84,8 +105,9 @@ const PrimarySearchAppBar = ({ handleDrawerToggle }) => {
             open={isMenuOpen}
             onClose={handleMenuClose}
         >
-            <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
             <MenuItem onClick={handleMenuClose}>My account</MenuItem>
+            <MenuItem onClick={handleMenuClose}>Change Password</MenuItem>
+            <MenuItem onClick={handleSubmit}>Logout</MenuItem>
         </Menu>
     );
 
@@ -142,7 +164,20 @@ const PrimarySearchAppBar = ({ handleDrawerToggle }) => {
     );
 
     return (
+        
         <Box sx={{ flexGrow: 1 }}>
+             <ToastContainer
+                    position="top-center"
+                    autoClose={5000}
+                    hideProgressBar={false}
+                    newestOnTop={false}
+                    closeOnClick
+                    rtl={false}
+                    pauseOnFocusLoss
+                    draggable
+                    pauseOnHover
+                    theme="light"
+                />
             <AppBar position="fixed" sx={{ backgroundColor: 'linear-gradient(90deg, rgba(5,7,46,1) 0%, rgba(36,37,65,1) 100%)', boxShadow: '0 4px 12px rgba(0,0,0,0.2)' }}>
                 <Toolbar>
                     <IconButton

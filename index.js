@@ -11,6 +11,7 @@ import authController from './controllers/authController.js';
 import trackerController from './controllers/trackerController.js';
 //import csrf from './controllers/csrfToken.js';
 import csrf from 'csurf';
+import userdetailController from './controllers/userdetailController.js';
 dotenv.config();
 
 const app = express();
@@ -79,6 +80,7 @@ app.use((req, res, next) => {
 // Routes
 app.use('/api/v1/auth', authController);
 app.use('/api/v1/tracker', trackerController);
+app.use('/api/v1/detail', userdetailController);
 //app.use('/api/v1', csrf);
 
 app.get('/', (req, res) => {

@@ -19,20 +19,24 @@ import {
     FormControl,
     InputLabel,
     Typography,
+    TextField,
+    Checkbox,
+    ListItemText,
 } from '@mui/material';
-import { FilterList, Edit } from '@mui/icons-material';
+import { FilterList, Edit, Add, Search } from '@mui/icons-material';
 import { styled, ThemeProvider, createTheme } from '@mui/material/styles';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../Layout';
+import api from '../api';
 
 const theme = createTheme({
     palette: {
         primary: {
-            main: '#4caf50',
+            main: '#1976d2',
         },
         secondary: {
-            main: '#f44336',
+            main: '#d32f2f',
         },
     },
     typography: {
@@ -40,7 +44,7 @@ const theme = createTheme({
             fontWeight: 600,
         },
         body2: {
-            color: '#ffffff',
+            color: '#333333',
         },
     },
 });
@@ -48,57 +52,104 @@ const theme = createTheme({
 const StyledContainer = styled(Container)(({ theme }) => ({
     marginTop: theme.spacing(4),
     padding: theme.spacing(4),
-    background: 'linear-gradient(90deg, rgba(5,7,46,1) 0%, rgba(36,37,65,1) 100%)',
-    color: '#ffffff',
     borderRadius: theme.shape.borderRadius,
-    boxShadow: '0px 10px 30px rgba(0, 0, 0, 0.3)',
+    boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.1)',
 }));
 
 const StyledTableHead = styled(TableHead)(({ theme }) => ({
-    backgroundColor: 'rgba(36,37,65,1)',
+    backgroundColor: theme.palette.primary.main,
     '& .MuiTableCell-head': {
         color: theme.palette.common.white,
         fontWeight: 'bold',
     },
 }));
 
-const Trackers = () => {
+const Users = () => {
     const [data, setData] = useState([]);
     const [filteredData, setFilteredData] = useState([]);
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(5);
     const [filters, setFilters] = useState({
         company: '',
-        location: '',
+        location: [],
         lawarea: '',
     });
+    const [searchQuery, setSearchQuery] = useState("");
+    const [companies, setCompanies] = useState([]);
+    const [lawAreas, setLawAreas] = useState([]);
+    const [locations, setLocations] = useState([]);
+    const [vendors, setVendors] = useState([]);
 
     const navigate = useNavigate();
 
     useEffect(() => {
-        // Fetch data initially and set state
-        axios.get('/api/trackers').then((response) => {
-            setData(response.data);
-            setFilteredData(response.data);
-        });
+        const fetchUserInfoAndUsers = async () => {
+            try {
+                const { data } = await api.get('http://localhost:3001/api/v1/detail/userinfo');
+                setCompanies([data.companyDetails.company_name]);
+                setLocations(data.companyDetails.locations);
+                setVendors(data.companyDetails.vendors || []);
+                if (data.companyDetails.company_name) {
+                    const response = await api.post('http://localhost:3001/api/v1/detail/Users', {
+                        company: data.companyDetails.company_name,
+                    });
+                    setData(response.data);
+                    setFilteredData(response.data);
+                }
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
+        };
+        fetchUserInfoAndUsers();
     }, []);
 
     const handleFilterChange = (e) => {
         const { name, value } = e.target;
-        setFilters({
-            ...filters,
-            [name]: value,
-        });
+        if (name === 'location') {
+            if (value.includes('All')) {
+                setFilters({
+                    ...filters,
+                    location: filters.location.length === locations.length ? [] : locations,
+                });
+            } else {
+                setFilters({
+                    ...filters,
+                    [name]: value,
+                });
+            }
+        } else {
+            setFilters({
+                ...filters,
+                [name]: value,
+            });
+        }
     };
 
-    const handleFilterSubmit = () => {
-        const filtered = data.filter(
-            (row) =>
-                (filters.company ? row.company === filters.company : true) &&
-                (filters.location ? row.location === filters.location : true) &&
-                (filters.lawarea ? row.lawarea.includes(filters.lawarea) : true)
-        );
-        setFilteredData(filtered);
+    const handleFilterSubmit = async () => {
+        try {
+            const response = await api.post('http://localhost:3001/api/v1/detail/Users', {
+                company: filters.company,
+                location: filters.location,
+                lawarea: filters.lawarea,
+            });
+            setFilteredData(response.data);
+        } catch (error) {
+            console.error("Error fetching filtered data:", error);
+        }
+    };
+
+    const handleClearFilters = () => {
+        setFilters({
+            company: '',
+            location: [],
+            lawarea: '',
+        });
+        setSearchQuery("");
+        setFilteredData([]);
+    };
+
+    const handleExport = () => {
+        console.log('Exporting data...');
     };
 
     const handleChangePage = (event, newPage) => {
@@ -110,81 +161,144 @@ const Trackers = () => {
         setPage(0);
     };
 
+    const handleSearch = (e) => {
+        setSearchQuery(e.target.value);
+    };
+
     return (
         <Layout>
             <ThemeProvider theme={theme}>
                 <StyledContainer>
-                    <Box display="flex" alignItems="center" mb={2}>
-                        <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                    <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+                        <Typography variant="h6" color="primary">
                             Manage Users
                         </Typography>
                         <Tooltip title="Filter List">
-                            <FilterList sx={{ ml: 2, cursor: 'pointer', color: '#ffffff' }} />
+                            <IconButton color="primary">
+                                <FilterList />
+                            </IconButton>
                         </Tooltip>
                     </Box>
-                    <Grid container spacing={3}>
-                        <Grid item xs={12} md={4}>
-                            <FormControl fullWidth>
-                                <InputLabel sx={{ color: '#ffffff' }}>Company</InputLabel>
+
+                    {/* Filters and Submit Button */}
+                    <Grid container spacing={2} sx={{ display: 'flex', alignItems: 'center' }}>
+                        {/* Company Dropdown */}
+                        <Grid item xs={12} md={3}>
+                            <FormControl fullWidth variant="outlined">
+                                <InputLabel>Company</InputLabel>
                                 <Select
                                     value={filters.company}
                                     onChange={handleFilterChange}
                                     name="company"
                                     label="Company"
-                                    sx={{ color: '#ffffff', '.MuiOutlinedInput-notchedOutline': { borderColor: '#ffffff' } }}
                                 >
-                                    <MenuItem value="Kotak Securities Limited">
-                                        Kotak Securities Limited
-                                    </MenuItem>
-                                    {/* Add more options as needed */}
+                                    {companies.map((company, index) => (
+                                        <MenuItem key={index} value={company}>
+                                            {company}
+                                        </MenuItem>
+                                    ))}
                                 </Select>
                             </FormControl>
                         </Grid>
-                        <Grid item xs={12} md={4}>
-                            <FormControl fullWidth>
-                                <InputLabel sx={{ color: '#ffffff' }}>Location</InputLabel>
+
+                        {/* Location Dropdown */}
+                        <Grid item xs={12} md={3}>
+                            <FormControl fullWidth variant="outlined">
+                                <InputLabel>Location</InputLabel>
                                 <Select
+                                    multiple
                                     value={filters.location}
                                     onChange={handleFilterChange}
                                     name="location"
                                     label="Location"
-                                    sx={{ color: '#ffffff', '.MuiOutlinedInput-notchedOutline': { borderColor: '#ffffff' } }}
+                                    renderValue={(selected) => selected.join(', ')}
                                 >
-                                    <MenuItem value="KSL-Mumbai-Corporate Office">
-                                        KSL-Mumbai-Corporate Office
+                                    <MenuItem value="All">
+                                        <Checkbox checked={filters.location.length === locations.length} />
+                                        <ListItemText primary="All" />
                                     </MenuItem>
-                                    {/* Add more options as needed */}
+                                    {locations.map((location, index) => (
+                                        <MenuItem key={index} value={location}>
+                                            <Checkbox checked={filters.location.indexOf(location) > -1} />
+                                            <ListItemText primary={location} />
+                                        </MenuItem>
+                                    ))}
                                 </Select>
                             </FormControl>
                         </Grid>
-                        <Grid item xs={12} md={4}>
-                            <FormControl fullWidth>
-                                <InputLabel sx={{ color: '#ffffff' }}>Lawarea</InputLabel>
+
+                        {/* Vendors Dropdown */}
+                        <Grid item xs={12} md={3}>
+                            <FormControl fullWidth variant="outlined">
+                                <InputLabel>Vendors</InputLabel>
                                 <Select
                                     value={filters.lawarea}
                                     onChange={handleFilterChange}
                                     name="lawarea"
-                                    label="Lawarea"
-                                    sx={{ color: '#ffffff', '.MuiOutlinedInput-notchedOutline': { borderColor: '#ffffff' } }}
+                                    label="Vendors"
                                 >
-                                    <MenuItem value="Internal Requirement">
-                                        Internal Requirement
-                                    </MenuItem>
-                                    {/* Add more options as needed */}
+                                    {vendors.map((vendor, index) => (
+                                        <MenuItem key={index} value={vendor}>
+                                            {vendor}
+                                        </MenuItem>
+                                    ))}
                                 </Select>
                             </FormControl>
                         </Grid>
-                        <Grid item xs={12}>
+
+                        {/* Submit Button */}
+                        <Grid item xs={12} md={2}>
                             <Button
                                 variant="contained"
                                 color="primary"
                                 onClick={handleFilterSubmit}
-                                sx={{ mt: 2 }}
+                                sx={{ mt: 1.5 }}
                             >
-                                Apply Filters
+                                Submit
                             </Button>
                         </Grid>
                     </Grid>
+
+                    {/* Search field and Search button */}
+                    <Grid item xs={12} md={6} sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 2 }}>
+                        <TextField
+                            sx={{ width: '100vh' }}
+                            variant="outlined"
+                            label="Search by First or Last Name"
+                            value={searchQuery}
+                            onChange={handleSearch}
+                            InputProps={{
+                                endAdornment: (
+                                    <Search color="primary" />
+                                ),
+                            }}
+                        />
+                        <Button variant="contained" color="primary" onClick={handleFilterSubmit}>
+                            Search
+                        </Button>
+                        <Button variant="outlined" color="secondary" onClick={handleClearFilters}>
+                            Clear
+                        </Button>
+                    </Grid>
+
+
+                    {/* Button Group */}
+                    <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'flex-start', gap: 2, mt: 2 }}>
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            startIcon={<Add />}
+                            onClick={() => navigate('/add_user')}
+                        >
+                            New User
+                        </Button>
+                    </Grid>
+                    <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 2 }}>
+                        <Button variant="contained" color="primary" onClick={handleExport}>
+                            Export
+                        </Button>
+                    </Grid>
+
                     <TableContainer component={Paper} sx={{ marginTop: 4 }}>
                         <Table>
                             <StyledTableHead>
@@ -193,7 +307,6 @@ const Trackers = () => {
                                     <TableCell>Last Name</TableCell>
                                     <TableCell>E-mail</TableCell>
                                     <TableCell>Location</TableCell>
-                                    <TableCell>Lawarea</TableCell>
                                     <TableCell>Role</TableCell>
                                     <TableCell>Edit</TableCell>
                                 </TableRow>
@@ -201,27 +314,29 @@ const Trackers = () => {
                             <TableBody>
                                 {filteredData
                                     .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                                    .map((row) => (
-                                        <TableRow key={row.id} sx={{ '&:hover': { backgroundColor: 'rgba(5,7,46,0.1)' } }}>
-                                            <TableCell>{row.firstName}</TableCell>
-                                            <TableCell>{row.lastName}</TableCell>
-                                            <TableCell>{row.email}</TableCell>
-                                            <TableCell>{row.location}</TableCell>
-                                            <TableCell>{row.lawarea.join(', ')}</TableCell>
-                                            <TableCell>{row.role}</TableCell>
-                                            <TableCell>
-                                                <Tooltip title="Edit">
-                                                    <IconButton
-                                                        onClick={() => navigate(`/edit/${row.id}`)}
-                                                        size="small"
-                                                        color="primary"
-                                                    >
-                                                        <Edit />
-                                                    </IconButton>
-                                                </Tooltip>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
+                                    .map((row) => {
+                                        const [firstName, ...lastName] = row.name.split(' ');
+                                        return (
+                                            <TableRow key={row.id} hover>
+                                                <TableCell>{firstName}</TableCell>
+                                                <TableCell>{lastName.join(' ')}</TableCell>
+                                                <TableCell>{row.email}</TableCell>
+                                                <TableCell>{row.location}</TableCell>
+                                                <TableCell>{row.role}</TableCell>
+                                                <TableCell>
+                                                    <Tooltip title="Edit">
+                                                        <IconButton
+                                                            onClick={() => navigate(`/edit-user/${row._id}`)}
+                                                            size="small"
+                                                            color="primary"
+                                                        >
+                                                            <Edit />
+                                                        </IconButton>
+                                                    </Tooltip>
+                                                </TableCell>
+                                            </TableRow>
+                                        );
+                                    })}
                             </TableBody>
                         </Table>
                         <TablePagination
@@ -240,4 +355,4 @@ const Trackers = () => {
     );
 };
 
-export default Trackers;
+export default Users;

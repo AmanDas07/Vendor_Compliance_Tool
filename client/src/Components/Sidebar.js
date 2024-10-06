@@ -111,7 +111,7 @@ export default function Sidebar({ mobileOpen, handleDrawerToggle }) {
                     </ListItemButton>
                 </ListItem>
                 <ListItem disablePadding>
-                    <ListItemButton>
+                    <ListItemButton onClick={() => navigate(`/dashboard/${localStorage.getItem('userRole')}`)}>
                         <ListItemIcon>
                             <DashboardIcon sx={{ color: '#ffffff' }} />
                         </ListItemIcon>

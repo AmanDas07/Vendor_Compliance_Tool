@@ -1,8 +1,9 @@
 import mongoose from 'mongoose';
 
 const userSchema = new mongoose.Schema({
-    Company: {
-        type: String,
+    company: {
+        type: mongoose.Schema.Types.ObjectId,  // Reference to the Company schema
+        ref: 'companies',  // Name of the Company model
         required: true,
     },
     name: {
@@ -25,7 +26,7 @@ const userSchema = new mongoose.Schema({
     },
     messagesSent: [{
         to: {
-            type: String,
+            type: mongoose.Schema.Types.ObjectId,
             ref: 'Users',
         },
         subject: {
@@ -41,11 +42,10 @@ const userSchema = new mongoose.Schema({
             default: Date.now,
         }
     }],
-
     messagesRecieved: [{
         from: {
-            type: mongoose.Schema.ObjectId,
-            ref: 'users',
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Users',
         },
         subject: {
             type: String,
@@ -59,6 +59,10 @@ const userSchema = new mongoose.Schema({
             type: Date,
             default: Date.now,
         }
+    }],
+    vendors: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Vendor'
     }],
     role: {
         type: String,

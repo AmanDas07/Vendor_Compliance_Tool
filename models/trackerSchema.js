@@ -1,10 +1,10 @@
 import mongoose from "mongoose";
 import fileSchema from "./fileSchema.js";
-import { v4 as uuidv4 } from 'uuid';
 
 const trackerSchema = new mongoose.Schema({
-    companyName: {
-        type: String,
+    company: {
+        type: mongoose.Schema.Types.ObjectId,  // Reference to the Company schema
+        ref: 'Company',  // Name of the Company model
         required: true,
     },
     uniqueIdentifier: {
@@ -83,18 +83,18 @@ const trackerSchema = new mongoose.Schema({
             },
             postedBy: {
                 type: mongoose.Schema.ObjectId,
-                ref: "users",
+                ref: "Users",
             },
         },
     ],
     trackerOwner: {
         type: mongoose.Schema.ObjectId,
-        ref: "users",
+        ref: "Users",
         required: true,
     },
     trackerManager: {
         type: mongoose.Schema.ObjectId,
-        ref: "users",
+        ref: "Users",
         required: true,
     },
     supportingDocuments: {

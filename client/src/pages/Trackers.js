@@ -32,6 +32,7 @@ import { ThemeProvider, createTheme, styled } from '@mui/material/styles';
 import axios from 'axios';
 import { FilterList, Search, Edit, AccountBalance, Assignment, TrendingUp } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import api from "../api";
 
 const theme = createTheme({
     palette: {
@@ -193,7 +194,9 @@ const Trackers = () => {
         e.preventDefault();
         console.log('Selections state before API request:', selections); // Debug log
         try {
-            const { data } = await axios.post(`http://localhost:8080/api/v1/tracker/get-trackers`, selections);
+            const { data } = await api.post(`http://localhost:3001/api/v1/tracker/get-trackers`, selections, {
+                withCredentials: true
+            });
             setData(data);
             setFilteredData(data); // Initialize filteredData with all data
         } catch (error) {

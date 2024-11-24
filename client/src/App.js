@@ -14,6 +14,7 @@ import ManagerDashboard from './pages/managerDashboard.js';
 import { UserProvider } from './context/userContext.js';
 import Users from './pages/usersPage.js';
 import EditUser from './pages/editUser.js';
+import AssignmentPage from './pages/trackerAssignment.js';
 function App() {
   return (
     <UserProvider>
@@ -24,10 +25,10 @@ function App() {
         <Route path='/Edit/:uin' element={<EditPage />} />
         <Route path="/edit-user/:id" element={<EditUser />} />
 
-        <Route path="/dashboard/owner" element={<OwnerRoute />}>
-          <Route path="" element={<ComplianceCalendar />} />
-        </Route>
 
+        <Route path="/dashboard/owner" element={<ComplianceCalendar />} />
+
+        <Route path="/manage_tracker/assignment" element={<AssignmentPage />} />
         <Route path="/dashboard/manager" element={<ManagerRoute />}>
           <Route path="" element={<ManagerDashboard />} />
         </Route>

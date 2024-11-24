@@ -37,7 +37,7 @@ const Layout = (props) => {
 
                 {/* Footer */}
                 <footer className="footer">
-                    <div className="footer-content">
+                    <div className="footer-content" >
                         <p>Powered by Complisense © 2024 All Rights Reserved.</p>
                     </div>
                 </footer>

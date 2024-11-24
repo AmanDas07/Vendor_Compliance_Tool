@@ -44,6 +44,7 @@ const EditUser = () => {
     const [company, setCompany] = useState('');
     const [location, setLocation] = useState('');
     const [lawArea, setLawArea] = useState('');
+    const [role, setRole] = useState('');
     console.log('UserId:', userId);
     const navigate = useNavigate();
 
@@ -56,6 +57,8 @@ const EditUser = () => {
                 setCompany(data.companyDetails.company_name);
                 setLocation(data.companyDetails.locations[0]);
                 setLawArea(data.companyDetails.lawArea[0]);
+                setRole(data.role);
+                console.log(data);
             } catch (error) {
                 console.error('Error fetching user info:', error);
             }
@@ -97,6 +100,9 @@ const EditUser = () => {
                                 onChange={(e) => setUserInfo({ ...userInfo, name: `${e.target.value} ${userInfo.name?.split(' ').slice(1).join(' ')}` })}
                                 variant="outlined"
                                 InputLabelProps={{ shrink: true }}
+                                InputProps={{
+                                    readOnly: true,
+                                }}
                             />
                         </Grid>
 
@@ -109,6 +115,10 @@ const EditUser = () => {
                                 onChange={(e) => setUserInfo({ ...userInfo, name: `${userInfo.name?.split(' ')[0]} ${e.target.value}` })}
                                 variant="outlined"
                                 InputLabelProps={{ shrink: true }}
+                                InputProps={{
+                                    readOnly: true,
+                                }}
+
                             />
                         </Grid>
 
@@ -121,6 +131,9 @@ const EditUser = () => {
                                 onChange={(e) => setUserInfo({ ...userInfo, email: e.target.value })}
                                 variant="outlined"
                                 InputLabelProps={{ shrink: true }}
+                                InputProps={{
+                                    readOnly: true,
+                                }}
                             />
                         </Grid>
 
@@ -133,6 +146,7 @@ const EditUser = () => {
                                 onChange={(e) => setUserInfo({ ...userInfo, phone: e.target.value })}
                                 variant="outlined"
                                 InputLabelProps={{ shrink: true }}
+
                             />
                         </Grid>
                     </Grid>
@@ -143,18 +157,18 @@ const EditUser = () => {
                     <Grid container spacing={3}>
                         {/* Role */}
                         <Grid item xs={12} sm={6}>
-                            <FormControl fullWidth>
-                                <InputLabel shrink>Role</InputLabel>
-                                <Select
-                                    value={userInfo.role || ''}
-                                    onChange={(e) => setUserInfo({ ...userInfo, role: e.target.value })}
-                                    label="Role"
-                                >
-                                    <MenuItem value="Compliance Owner">Compliance Owner</MenuItem>
-                                    <MenuItem value="Manager">Manager</MenuItem>
-                                    <MenuItem value="Viewer">Viewer</MenuItem>
-                                </Select>
-                            </FormControl>
+                            <TextField
+                                fullWidth
+                                label="Mobile"
+                                value={userInfo.role || ''}
+                                onChange={(e) => setUserInfo({ ...userInfo, role: e.target.value })}
+                                variant="outlined"
+                                InputLabelProps={{ shrink: true }}
+                                InputProps={{
+                                    readOnly: true
+                                }}
+                            />
+
                         </Grid>
 
 
@@ -167,6 +181,9 @@ const EditUser = () => {
                                     onChange={(e) => setCompany(e.target.value)}
                                     label="Company"
                                 >
+                                    {
+
+                                    }
                                     <MenuItem value="Company 1">Company 1</MenuItem>
                                     <MenuItem value="Company 2">Company 2</MenuItem>
                                 </Select>

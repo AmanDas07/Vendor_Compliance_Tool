@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { Box, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Collapse, Button, Modal, TextField, Typography, IconButton, Stack, Chip } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
+import { ToastContainer, toast } from 'react-toastify';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import WorkspaceIcon from '@mui/icons-material/Workspaces';
 import DashboardIcon from '@mui/icons-material/Dashboard';
@@ -19,7 +20,7 @@ import DescriptionIcon from '@mui/icons-material/Description';
 import CloseIcon from '@mui/icons-material/Close';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-
+import api from '../../src/api.js';
 export default function Sidebar({ mobileOpen, handleDrawerToggle }) {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -55,6 +56,35 @@ export default function Sidebar({ mobileOpen, handleDrawerToggle }) {
             [name]: value,
         }));
     };
+    const handleSendEmail = async () => {
+        const formData = new FormData();
+        formData.append('from', emailData.from);
+        formData.append('to', emailData.to);
+        formData.append('subject', emailData.subject);
+        formData.append('message', emailData.message);
+
+        attachments.forEach((file) => {
+            formData.append('attachments', file);
+        });
+
+        try {
+            console.log(formData);
+            const response = await api.post('http://localhost:3001/api/v1/email/send', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+            });
+
+            if (response.status === 200) {
+                toast.success('Email sent successfully!');
+                handleModalClose();
+            } else {
+                toast.success('Failed to send email.');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            toast.error('Failed to send email. Please try again.');
+        }
+    };
+
 
     const handleFileChange = (e) => {
         const file = e.target.files[0];
@@ -67,32 +97,22 @@ export default function Sidebar({ mobileOpen, handleDrawerToggle }) {
         setAttachments((prevFiles) => prevFiles.filter((_, i) => i !== index));
     };
 
-    const handleSendEmail = async () => {
-        try {
-            const formData = new FormData();
-            formData.append('to', emailData.to);
-            formData.append('subject', emailData.subject);
-            formData.append('message', emailData.message);
-            attachments.forEach((file, index) => {
-                formData.append(`attachment${index}`, file);
-            });
-
-            await axios.post('http://localhost:3001/api/v1/email', formData, {
-                headers: { 'Content-Type': 'multipart/form-data' },
-            });
-
-            alert('Email sent successfully!');
-            handleModalClose(); // Close the modal and reset form
-        } catch (error) {
-            alert('Failed to send email. Please try again.');
-            console.error(error);
-        }
-    };
-
     const drawerWidth = 280;
 
     const drawer = (
         <Box sx={{ overflow: 'auto', display: 'flex', flexDirection: 'column', height: '100%' }}>
+            <ToastContainer
+                position="top-center"
+                autoClose={5000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="light"
+            />
             <List sx={{ flexGrow: 1 }}>
                 <ListItem disablePadding>
                     <ListItemButton onClick={() => navigate('/alltrackers')}>
@@ -140,7 +160,7 @@ export default function Sidebar({ mobileOpen, handleDrawerToggle }) {
                             </ListItemButton>
                         </ListItem>
                         <ListItem disablePadding>
-                            <ListItemButton sx={{ pl: 4 }} onClick={() => navigate('/manage/tracker-assignment')}>
+                            <ListItemButton sx={{ pl: 4 }} onClick={() => navigate('/manage_tracker/assignment')}>
                                 <ListItemIcon>
                                     <AssignmentIcon sx={{ color: '#ffffff' }} />
                                 </ListItemIcon>
@@ -234,10 +254,17 @@ export default function Sidebar({ mobileOpen, handleDrawerToggle }) {
                     >
                         <CloseIcon />
                     </IconButton>
-
-                    <Typography id="email-modal-title" variant="h6" component="h2" sx={{ mb: 2 }}>
+                    <Typography variant="h6" component="h2" sx={{ mb: 2 }}>
                         Send Email
                     </Typography>
+                    <TextField
+                        label="From"
+                        name="from"
+                        fullWidth
+                        variant="outlined"
+                        value={emailData.from}
+                        onChange={handleInputChange}
+                    />
                     <TextField
                         label="To"
                         name="to"
@@ -267,43 +294,17 @@ export default function Sidebar({ mobileOpen, handleDrawerToggle }) {
 
                     {/* Attachments Section */}
                     <Stack direction="row" spacing={1} sx={{ mt: 2 }}>
-                        <Button
-                            variant="contained"
-                            component="label"
-                            startIcon={<AttachFileIcon />}
-                        >
+                        <Button variant="contained" component="label" startIcon={<AttachFileIcon />}>
                             Attach File
-                            <input
-                                type="file"
-                                hidden
-                                onChange={handleFileChange}
-                            />
+                            <input type="file" hidden onChange={handleFileChange} />
                         </Button>
-                        <Button
-                            variant="contained"
-                            component="label"
-                            startIcon={<ImageIcon />}
-                        >
+                        <Button variant="contained" component="label" startIcon={<ImageIcon />}>
                             Attach Image
-                            <input
-                                type="file"
-                                hidden
-                                accept="image/*"
-                                onChange={handleFileChange}
-                            />
+                            <input type="file" hidden accept="image/*" onChange={handleFileChange} />
                         </Button>
-                        <Button
-                            variant="contained"
-                            component="label"
-                            startIcon={<DescriptionIcon />}
-                        >
+                        <Button variant="contained" component="label" startIcon={<DescriptionIcon />}>
                             Attach PDF
-                            <input
-                                type="file"
-                                hidden
-                                accept="application/pdf"
-                                onChange={handleFileChange}
-                            />
+                            <input type="file" hidden accept="application/pdf" onChange={handleFileChange} />
                         </Button>
                     </Stack>
 
@@ -321,7 +322,9 @@ export default function Sidebar({ mobileOpen, handleDrawerToggle }) {
                                 />
                             ))
                         ) : (
-                            <Typography variant="body2" color="textSecondary">No attachments selected</Typography>
+                            <Typography variant="body2" color="textSecondary">
+                                No attachments selected
+                            </Typography>
                         )}
                     </Box>
 

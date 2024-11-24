@@ -5,6 +5,7 @@ import { uploadFile } from './s3service.js';
 import Tracker from '../models/trackerSchema.js';
 import { requireSignIn, sessionCheck } from '../middlewares/authMiddleware.js';
 import { v4 as uuidv4 } from 'uuid';
+import userModel from "../models/userModel.js";
 // csrf,
 const trackerController = Router();
 const upload = multer({ dest: 'uploads/' });
@@ -91,7 +92,7 @@ trackerController.post('/create-tracker', requireSignIn, upload.array('files', 1
 trackerController.post("/get-trackers", requireSignIn, sessionCheck, async (req, res) => {
     const companyName = req.body.company;
     const location = req.body.state;
-    //const lawArea = req.body.lawArea;
+    const lawArea = req.body.lawArea;
     const periodicity = req.body.periodicity;
     const startDate = req.body.startDate;
     const endDate = req.body.endDate;
@@ -105,9 +106,9 @@ trackerController.post("/get-trackers", requireSignIn, sessionCheck, async (req,
     if (location) {
         query.location = location;
     }
-    /*if (lawArea) {
+    if (lawArea) {
         query.lawArea = lawArea;
-    }*/
+    }
     if (periodicity) {
         query.periodicity = periodicity;
     }
@@ -126,11 +127,20 @@ trackerController.post("/get-trackers", requireSignIn, sessionCheck, async (req,
     console.log('Constructed query:', query);
     try {
         const results = await Tracker.find(query).exec();
-        console.log(results);
-        return res.status(200).send(results);
+        const user = await userModel.findById(req.user._id).select('Assigned').exec();
+        if (!user) {
+            return res.status(404).send({ message: 'User not found' });
+        }
+        const assignedTrackers = user.Assigned.map(id => id.toString());
+        const filteredResults = results.filter(tracker =>
+            assignedTrackers.includes(tracker._id.toString())
+        );
+        console.log(filteredResults);
+        return res.status(200).send(filteredResults);
+
     } catch (error) {
         console.error('Error fetching trackers:', error);
-        throw new Error('Error fetching trackers');
+        return res.status(500).send({ message: 'Error fetching trackers' });
     }
 })
 

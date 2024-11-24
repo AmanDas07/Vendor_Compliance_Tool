@@ -1,50 +1,51 @@
-const express = require('express');
-const multer = require('multer');
-const mailgun = require('mailgun-js');
-const path = require('path');
+import { SendMailClient } from 'zeptomail';
+import multer from 'multer';
+import { Router } from 'express';
 
-const app = express();
-const DOMAIN = 'your-domain.com'; // Replace with your Mailgun domain
-const API_KEY = 'your-mailgun-api-key'; // Replace with your Mailgun API key
-
-const mg = mailgun({ apiKey: API_KEY, domain: DOMAIN });
-
-// Multer setup for file uploads
-const storage = multer.memoryStorage(); // Store files in memory (RAM)
+const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-// Email sending function
-const sendEmail = async (req, res) => {
-    const { to, subject, message } = req.body;
+const emailController = Router();
+const ZEPTOMAIL_API_URL = "api.zeptomail.in/";
+const ZEPTOMAIL_API_KEY = "Zoho-enczapikey PHtE6r0IEbu6iGAu+hII7f7tFs6nNNt4q+s0KlES4YoWDf5XTk1UqYsiwz7i+h0oVaUWQKafzN08trOcurmBdGi8ZmkYDWqyqK3sx/VYSPOZsbq6x00et1UTc0zYVIHsdtRo3CTSs9jcNA==";
 
-    // Create an array of attachments for Mailgun
-    const attachments = [];
-    if (req.files) {
-        req.files.forEach(file => {
-            attachments.push(new mg.Attachment({
-                data: file.buffer, // Use buffer to attach file directly from memory
-                filename: file.originalname,
-                contentType: file.mimetype,
-            }));
-        });
-    }
+const client = new SendMailClient({ url: ZEPTOMAIL_API_URL, token: ZEPTOMAIL_API_KEY });
 
-    const emailData = {
-        from: 'Your App <no-reply@your-domain.com>', // Replace with your "from" address
-        to: to,
-        subject: subject,
-        text: message,
-        attachment: attachments // Attachments array
-    };
+emailController.post('/send', upload.any(), async (req, res) => {
+    const { from, to, subject, message } = req.body;
+
+    // Convert uploaded files into attachments format for ZeptoMail
+    const attachments = req.files.map(file => ({
+        content: file.buffer.toString('base64'),
+        name: file.originalname,
+        mime_type: file.mimetype
+    }));
 
     try {
-        await mg.messages().send(emailData);
-        res.status(200).json({ message: 'Email sent successfully' });
-    } catch (error) {
-        console.error('Error sending email:', error);
-        res.status(500).json({ message: 'Failed to send email' });
-    }
-};
+        await client.sendMail({
+            from: {
+                address: `${from}@complisense.in`,
+                name: "noreply"
+            },
+            to: [
+                {
+                    email_address: {
+                        address: to,
+                        name: "Updates"
+                    }
+                }
+            ],
+            subject: subject,
+            htmlbody: `<div><b>${message}</b></div>`,
+            attachments: attachments
+        });
 
-// Endpoint for sending emails with attachments
-app.post('/api/v1/email', upload.any(), sendEmail);
+        console.log("Email sent successfully");
+        res.status(200).json({ message: "Email sent successfully" });
+    } catch (error) {
+        console.error("Error sending email:", error);
+        res.status(500).json({ error: "Failed to send email" });
+    }
+});
+
+export default emailController;

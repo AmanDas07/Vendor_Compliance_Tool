@@ -7,11 +7,9 @@ const userdetailController = Router();  // Initialize Router
 
 userdetailController.get("/userinfo", requireSignIn, sessionCheck, async (req, res) => {
     try {
-        const user = req.user;
+        const user = await userModel.findById(req.user._id).populate("company");
         user.Company = '6701ac690ce6258792736ef1';
-        // Query the Company collection using the company ID stored in the user document
         const companyDetails = await Company.findById(user.Company);
-
         if (!companyDetails) {
             return res.status(400).send({ message: "Company not found" });
         }
@@ -29,7 +27,6 @@ userdetailController.get("/userinfo", requireSignIn, sessionCheck, async (req, r
                 lawArea: companyDetails.lawArea,
             }
         };
-
         // Send the combined object as the response
         return res.status(200).send(userInfo);
 
@@ -106,5 +103,29 @@ userdetailController.put("/update-user/:userId", requireSignIn, sessionCheck, as
 });
 
 
+userdetailController.post("/getDetails", requireSignIn, sessionCheck, async (req, res) => {
+    try {
+        const company_name = req.body.company_name;
+        const company = await Company.findOne({ company_name: company_name }).select('lawArea');
+
+        if (company) {
+            res.status(200).json({
+                success: true,
+                data: company.lawArea
+            });
+        } else {
+            res.status(404).json({
+                success: false,
+                message: 'Company not found'
+            });
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            success: false,
+            message: 'Server error'
+        });
+    }
+});
 
 export default userdetailController;

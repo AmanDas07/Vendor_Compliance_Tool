@@ -42,6 +42,10 @@ const userSchema = new mongoose.Schema({
             default: Date.now,
         }
     }],
+    Assigned: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'trackers',
+    }],
     messagesRecieved: [{
         from: {
             type: mongoose.Schema.Types.ObjectId,

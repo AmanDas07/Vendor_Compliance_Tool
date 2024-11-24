@@ -12,7 +12,8 @@ const companySchema = new mongoose.Schema({
         required: true,
     },
     lawArea: {
-        type: [String],
+        type: Map,
+        of: [String],
         required: true,
     }
 }, { timestamps: true });

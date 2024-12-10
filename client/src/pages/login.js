@@ -17,20 +17,20 @@ const Login = () => {
 
 
 
-    /*useEffect(() => {
-        const fetchCsrfToken = async () => {
-            try {
-                const { data } = await axios.get('http://localhost:8082/api/v1/csrf-token');
-                axios.defaults.headers.common['X-CSRF-Token'] = data.csrfToken;
-                setCsrfToken(data.csrfToken);
-                console.log('CSRF Token:', data.csrfToken);
-                console.log('Axios Default Headers:', axios.defaults.headers.common); // Log to confirm
-            } catch (error) {
-                console.error('Error fetching CSRF token:', error);
-            }
-        };
-        fetchCsrfToken();
-    }, []);*/
+    /* useEffect(() => {
+         const fetchCsrfToken = async () => {
+             try {
+                 const { data } = await axios.get('http://localhost:3001/api/v1/csrf-token');
+                 axios.defaults.headers.common['X-CSRF-Token'] = data.csrfToken;
+                 setCsrfToken(data.csrfToken);
+                 console.log('CSRF Token:', data.csrfToken);
+                 console.log('Axios Default Headers:', axios.defaults.headers.common); // Log to confirm
+             } catch (error) {
+                 console.error('Error fetching CSRF token:', error);
+             }
+         };
+         fetchCsrfToken();
+     }, []);*/
 
 
     const handleSubmit = async (e) => {
@@ -54,6 +54,7 @@ const Login = () => {
             setLoading(false);
             // console.log("Error occurred:", error);
             if (error.response && error.response.data) {
+                console.log(error.response + "      " + error.response.data);
                 toast.error("Something went wrong");
             } else {
                 toast.error("An unexpected error occurred. Please try again.");

@@ -15,25 +15,39 @@ import { UserProvider } from './context/userContext.js';
 import Users from './pages/usersPage.js';
 import EditUser from './pages/editUser.js';
 import AssignmentPage from './pages/trackerAssignment.js';
+import InternalTrackers from './pages/internalTracker.js';
+import { ToastContainer, toast } from 'react-toastify';
 function App() {
   return (
     <UserProvider>
+      <ToastContainer
+        position="top-center"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
       <Routes>
         <Route path="/alltrackers" element={<Trackers />} />
         <Route path="/workspace" element={<Workspace />} />
         <Route path="/add_user" element={<UserForm />} />
         <Route path='/Edit/:uin' element={<EditPage />} />
         <Route path="/edit-user/:id" element={<EditUser />} />
-
-
-        <Route path="/dashboard/owner" element={<ComplianceCalendar />} />
-
+        <Route path="/dashboard/owner" element={<OwnerRoute />}>
+          <Route path="" element={<ComplianceCalendar />} />
+        </Route>
         <Route path="/manage_tracker/assignment" element={<AssignmentPage />} />
         <Route path="/dashboard/manager" element={<ManagerRoute />}>
           <Route path="" element={<ManagerDashboard />} />
         </Route>
 
         <Route path="/manage/users" element={<Users />} />
+        <Route path="/manage/internal-trackers" element={<InternalTrackers />} />
         <Route path="/owner" element={<ComplianceCalendar />} />
         <Route path='/INTEL_CLRA' element={<CLRAForm />} />
         <Route path='/Form_14' element={<FormXXIV />} />

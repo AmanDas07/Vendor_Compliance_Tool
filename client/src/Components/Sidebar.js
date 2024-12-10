@@ -68,7 +68,13 @@ export default function Sidebar({ mobileOpen, handleDrawerToggle }) {
         });
 
         try {
-            console.log(formData);
+
+            formData.forEach((value, key) => {
+                console.log(`${key}: ${value instanceof File ? value.name : value}`);
+            });
+            attachments.forEach((file, index) => {
+                console.log(`Attachment ${index + 1}:`, file);
+            })
             const response = await api.post('http://localhost:3001/api/v1/email/send', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
